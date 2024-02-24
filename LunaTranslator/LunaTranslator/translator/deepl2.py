@@ -1,21 +1,20 @@
- 
-from myutils.config import globalconfig,static_data
+from myutils.config import globalconfig, static_data
 import time
-from urllib.parse import quote 
+from urllib.parse import quote
 from translator.basetranslator import basetrans
 import random
-import urllib 
+import urllib
 import requests
 import base64
 
- 
+
 class TS(basetrans):
     def langmap(self):
-        x={_:_.upper() for _ in static_data["language_list_translator_inner"]}
+        x = {_: _.upper() for _ in static_data["language_list_translator_inner"]}
         x.pop('cht')
-        return  x# {"zh":"ZH","ja":"JA","en":"EN","es":"ES","fr":"FR","ru":"RU"}
-     
-    def translate(self,content): 
+        return x  # {"zh":"ZH","ja":"JA","en":"EN","es":"ES","fr":"FR","ru":"RU"}
+
+    def translate(self, content):
         headers = {
             'authority': 'www2.deepl.com',
             'accept': '*/*',
@@ -78,15 +77,15 @@ class TS(basetrans):
                     # },
                 },
                 'commonJobParams': {},
-                'timestamp': int(time.time()*1000),
+                'timestamp': int(time.time() * 1000),
             },
             'id': 3266547795,
         }
 
         response = self.session.post(
-            'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.11.2', 
+            'https://www2.deepl.com/jsonrpc?client=chrome-extension,1.11.2',
             headers=headers,
-            json=json_data, 
+            json=json_data,
         )
 
         try:

@@ -1,10 +1,11 @@
- 
-from myutils.config import globalconfig,static_data
+from myutils.config import globalconfig, static_data
 import time
-from urllib.parse import quote 
+from urllib.parse import quote
 from translator.basetranslator import basetrans
 import random
-import urllib 
+import urllib
+
+
 class Tse:
     def __init__(self):
         self.author = 'Ulion.Tse'
@@ -14,7 +15,6 @@ class Tse:
         self.transform_en_translator_pool = ('Itranslate', 'Lingvanex', 'MyMemory')
         self.auto_pool = ('auto', 'detect', 'auto-detect',)
         self.zh_pool = ('zh', 'zh-CN', 'zh-CHS', 'zh-Hans', 'zh-Hans_CN', 'cn', 'chi',)
-
 
     @staticmethod
     def get_headers(host_url, if_api=False, if_referer_for_host=True, if_ajax_for_api=True, if_json_for_api=False):
@@ -37,6 +37,8 @@ class Tse:
         if if_api and if_json_for_api:
             api_headers.update({'Content-Type': 'application/json'})
         return host_headers if not if_api else api_headers
+
+
 import requests
 import base64
 
@@ -56,7 +58,7 @@ class Deepl(Tse):
         self.output_zh = 'zh'
         self.input_limit = int(5e3)
         self.session = requests.Session()
-    
+
     def split_sentences_param(self, query_text, from_language):
         data = {
             'id': self.request_id,
@@ -75,7 +77,6 @@ class Deepl(Tse):
         }
         return {**self.params['split'], **data}
 
-
     def context_sentences_param(self, sentences, from_language, to_language):
         sentences = [''] + sentences + ['']
         data = {
@@ -93,9 +94,9 @@ class Deepl(Tse):
                     {
                         'kind': 'default',
                         # 'quality': 'fast', # -1
-                        'sentences': [{'id': i-1, 'prefix': '', 'text': sentences[i]}],
-                        'raw_en_context_before': sentences[1:i] if sentences[i-1] else [],
-                        'raw_en_context_after': [sentences[i+1]] if sentences[i+1] else [],
+                        'sentences': [{'id': i - 1, 'prefix': '', 'text': sentences[i]}],
+                        'raw_en_context_before': sentences[1:i] if sentences[i - 1] else [],
+                        'raw_en_context_after': [sentences[i + 1]] if sentences[i + 1] else [],
                         'preferred_num_beams': 1 if len(sentences) >= 4 else 4,  # 1 if two sentences else 4, len>=2+2
                     } for i in range(1, len(sentences) - 1)
                 ],
@@ -111,7 +112,6 @@ class Deepl(Tse):
         }
         return {**self.params['handle'], **data}
 
-
     # @Tse.time_stat
     def deepl_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs):
         timeout = kwargs.get('timeout', None)
@@ -124,13 +124,13 @@ class Deepl(Tse):
 
         not_update_cond_freq = 1 if self.query_count < update_session_after_freq else 0
         not_update_cond_time = 1 if time.time() - self.begin_time < update_session_after_seconds else 0
-         
-            
+
         from_language = from_language.upper() if from_language != 'auto' else from_language
         to_language = to_language.upper() if to_language != 'auto' else to_language
 
         ssp_data = self.split_sentences_param(query_text, from_language)
-        r_s = self.session.post(self.api_url, params=self.params['split'], json=ssp_data, headers=self.api_headers, timeout=timeout, proxies=proxies)
+        r_s = self.session.post(self.api_url, params=self.params['split'], json=ssp_data, headers=self.api_headers,
+                                timeout=timeout, proxies=proxies)
         r_s.raise_for_status()
         s_data = r_s.json()
         try:
@@ -139,26 +139,28 @@ class Deepl(Tse):
             raise Exception(s_data)
         h_data = self.context_sentences_param(s_sentences, from_language, to_language)
 
-        r_cs = self.session.post(self.api_url, params=self.params['handle'], json=h_data, headers=self.api_headers, timeout=timeout, proxies=proxies)
+        r_cs = self.session.post(self.api_url, params=self.params['handle'], json=h_data, headers=self.api_headers,
+                                 timeout=timeout, proxies=proxies)
         r_cs.raise_for_status()
         data = r_cs.json()
         time.sleep(sleep_seconds)
         self.request_id += 3
         self.query_count += 1
         try:
-            return data if is_detail_result else '\n'.join(item['beams'][0]['sentences'][0]["text"] for item in data['result']['translations'])
+            return data if is_detail_result else '\n'.join(
+                item['beams'][0]['sentences'][0]["text"] for item in data['result']['translations'])
         except:
             raise Exception(data)
- 
+
 
 class TS(basetrans):
     def langmap(self):
-        x={_:_.upper() for _ in static_data["language_list_translator_inner"]}
+        x = {_: _.upper() for _ in static_data["language_list_translator_inner"]}
         x.pop('cht')
-        return  x# {"zh":"ZH","ja":"JA","en":"EN","es":"ES","fr":"FR","ru":"RU"}
-    def inittranslator(self):  
-        self.engine=Deepl()
-    def translate(self,content): 
-         
-            return self.engine.deepl_api(content,self.srclang,self.tgtlang,proxies=self.proxy)
-          
+        return x  # {"zh":"ZH","ja":"JA","en":"EN","es":"ES","fr":"FR","ru":"RU"}
+
+    def inittranslator(self):
+        self.engine = Deepl()
+
+    def translate(self, content):
+        return self.engine.deepl_api(content, self.srclang, self.tgtlang, proxies=self.proxy)

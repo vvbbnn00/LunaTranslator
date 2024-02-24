@@ -1,26 +1,29 @@
- 
 from traceback import print_exc
 import requests
-from urllib.parse import quote,urlencode
+from urllib.parse import quote, urlencode
 import re
-import json  
+import json
 
 from myutils.config import globalconfig
 from translator.basetranslator import basetrans
 import time
+
+
 class TS(basetrans):
     def langmap(self):
-        return { "zh":"zh-CN","cht":"zh-TW"} 
-    def inittranslator(self)  :  
+        return {"zh": "zh-CN", "cht": "zh-TW"}
+
+    def inittranslator(self):
         pass
-    def translate(self,content):
+
+    def translate(self, content):
         res = "NONE"
         custom_url = "http://127.0.0.1:4990/"
         if custom_url == "":
             res = "Please, setup custom_url for OneRingTranslator (usually http://127.0.0.1:4990/)"
         else:
             import requests
-            response_orig = requests.get(custom_url+"translate",
+            response_orig = requests.get(custom_url + "translate",
                                          params={"text": content, "from_lang": self.srclang, "to_lang": self.tgtlang})
             if response_orig.status_code == 200:
                 response = response_orig.json()

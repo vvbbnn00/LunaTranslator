@@ -1,7 +1,9 @@
 import datetime
+
 ZERO = datetime.timedelta(0)
 HOUR = datetime.timedelta(hours=1)
 from datetime import datetime, timedelta, tzinfo
+
 
 class BaseTzInfo(tzinfo):
     # Overridden in subclass
@@ -12,8 +14,11 @@ class BaseTzInfo(tzinfo):
     def __str__(self):
         return self.zone
 
-def _UTC(): 
+
+def _UTC():
     return utc
+
+
 class UTC(BaseTzInfo):
     """UTC
 
@@ -62,12 +67,13 @@ class UTC(BaseTzInfo):
 
     def __str__(self):
         return "UTC"
-    
+
 
 UTC = utc = UTC()  # UTC is a singleton
 
+
 def timezone(zone):
-    if zone=='UTC':
+    if zone == 'UTC':
         return utc
     else:
         raise Exception(zone)

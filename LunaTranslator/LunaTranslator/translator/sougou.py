@@ -1,19 +1,20 @@
- 
 import re
 import time
 import hashlib
 from traceback import print_exc
 import requests
 from urllib import request
-from urllib.parse import quote 
+from urllib.parse import quote
 from translator.basetranslator import basetrans
 from myutils.config import globalconfig
 import random
 import functools
-import urllib 
+import urllib
+
+
 class Tse:
     def __init__(self):
-        self.author = 'Ulion.Tse' 
+        self.author = 'Ulion.Tse'
 
     @staticmethod
     def get_headers(host_url, if_api=False, if_referer_for_host=True, if_ajax_for_api=True, if_json_for_api=False):
@@ -36,7 +37,6 @@ class Tse:
         if if_api and if_json_for_api:
             api_headers.update({'Content-Type': 'application/json'})
         return host_headers if not if_api else api_headers
-   
 
 
 class Sogou(Tse):
@@ -53,7 +53,7 @@ class Sogou(Tse):
         self.language_map = None
         self.form_data = None
         self.query_count = 0
-        self.input_limit = 5000 
+        self.input_limit = 5000
 
     def get_form(self, query_text, from_language, to_language):
         uuid = ''
@@ -76,24 +76,25 @@ class Sogou(Tse):
         return form
 
     # @Tse.time_stat
-    def sogou_api(self, query_text ,src,tgt,proxy) :
-         
+    def sogou_api(self, query_text, src, tgt, proxy):
+
         with requests.Session() as ss:
-            _ = ss.get(self.host_url, headers=self.host_headers,proxies=proxy).text 
-            from_language,to_language=src,tgt
+            _ = ss.get(self.host_url, headers=self.host_headers, proxies=proxy).text
+            from_language, to_language = src, tgt
             self.form_data = self.get_form(query_text, from_language, to_language)
-            r = ss.post(self.api_url, headers=self.api_headers, data=self.form_data,proxies=proxy)
-          
-            data = r.json()  
-        return   data['data']['translate']['dit']
+            r = ss.post(self.api_url, headers=self.api_headers, data=self.form_data, proxies=proxy)
+
+            data = r.json()
+        return data['data']['translate']['dit']
 
 
 class TS(basetrans):
-    def inittranslator(self): 
-        self.engine=Sogou() 
-    def translate(self,content):  
-        ss=self.engine.sogou_api(content,self.srclang,self.tgtlang,self.proxy)   
+    def inittranslator(self):
+        self.engine = Sogou()
+
+    def translate(self, content):
+        ss = self.engine.sogou_api(content, self.srclang, self.tgtlang, self.proxy)
         return ss
+
     def langmap(self):
-        return {"zh":"zh-CHS"}
- 
+        return {"zh": "zh-CHS"}

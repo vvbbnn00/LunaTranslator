@@ -9,7 +9,10 @@ import os
 
 class TS(basetrans):
     def langmap(self):
-        return {'zh': 'Simplified Chinese', 'ja': 'Japanese', 'en': 'English', 'ru': 'Russian', 'es': 'Spanish', 'ko': 'Korean', 'fr': 'French', 'cht': 'Traditional Chinese', 'vi': 'Vietnamese', 'tr': 'Turkish', 'pl': 'Polish', 'uk': 'Ukrainian', 'it': 'Italian', 'ar': 'Arabic', 'th': 'Thai'}
+        return {'zh': 'Simplified Chinese', 'ja': 'Japanese', 'en': 'English', 'ru': 'Russian', 'es': 'Spanish',
+                'ko': 'Korean', 'fr': 'French', 'cht': 'Traditional Chinese', 'vi': 'Vietnamese', 'tr': 'Turkish',
+                'pl': 'Polish', 'uk': 'Ukrainian', 'it': 'Italian', 'ar': 'Arabic', 'th': 'Thai'}
+
     def __init__(self, typename):
         self.context = []
         super().__init__(typename)
@@ -29,13 +32,13 @@ class TS(basetrans):
             temperature = 0.3
 
         if self.config['使用自定义promt']:
-            message=[
-                {'role':'user','content':self.config['自定义promt']}
+            message = [
+                {'role': 'user', 'content': self.config['自定义promt']}
             ]
         else:
-            message=[
+            message = [
                 {"role": "system", "content": "You are a translator"},
-                    {"role": "user", "content": "translate from {} to {}".format(self.srclang,self.tgtlang)},
+                {"role": "user", "content": "translate from {} to {}".format(self.srclang, self.tgtlang)},
             ]
 
         for _i in range(min(len(self.context) // 2, self.contextnum)):
@@ -50,10 +53,11 @@ class TS(basetrans):
         }
 
         data = '{ "model": ' + json.dumps(
-            self.config['model']) + ', "stream": false, "temperature": ' + json.dumps(temperature) + ', "messages": ' + json.dumps(
+            self.config['model']) + ', "stream": false, "temperature": ' + json.dumps(
+            temperature) + ', "messages": ' + json.dumps(
             message) + ' }'
         if self.config['API接口地址'].endswith('/'):
-            self.config['API接口地址']=self.config['API接口地址'][:-1]
+            self.config['API接口地址'] = self.config['API接口地址'][:-1]
         response = self.session.post(self.config['API接口地址'] + '/chat/completions', headers=headers, data=data)
         try:
             response = response.json()
@@ -69,4 +73,4 @@ class TS(basetrans):
             })
             return message
         except:
-            raise Exception(json.dumps(response,ensure_ascii=False))
+            raise Exception(json.dumps(response, ensure_ascii=False))

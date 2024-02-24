@@ -1,5 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class SideGrip(QtWidgets.QWidget):
     def __init__(self, parent, edge):
         QtWidgets.QWidget.__init__(self, parent)
@@ -56,23 +57,25 @@ class SideGrip(QtWidgets.QWidget):
 
 class Mainw(QtWidgets.QMainWindow):
     _gripSize = 8
-    def __init__(self,x):
-        QtWidgets.QMainWindow.__init__(self,x)
+
+    def __init__(self, x):
+        QtWidgets.QMainWindow.__init__(self, x)
 
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
 
         self.sideGrips = [
-            SideGrip(self, QtCore.Qt.LeftEdge), 
-            SideGrip(self, QtCore.Qt.TopEdge), 
-            SideGrip(self, QtCore.Qt.RightEdge), 
-            SideGrip(self, QtCore.Qt.BottomEdge), 
+            SideGrip(self, QtCore.Qt.LeftEdge),
+            SideGrip(self, QtCore.Qt.TopEdge),
+            SideGrip(self, QtCore.Qt.RightEdge),
+            SideGrip(self, QtCore.Qt.BottomEdge),
         ]
         # corner grips should be "on top" of everything, otherwise the side grips
         # will take precedence on mouse events, so we are adding them *after*;
         # alternatively, widget.raise_() can be used
         self.cornerGrips = [QtWidgets.QSizeGrip(self) for i in range(4)]
         for s in self.cornerGrips:
-            s.setStyleSheet(""" background-color: transparent;  """) 
+            s.setStyleSheet(""" background-color: transparent;  """)
+
     @property
     def gripSize(self):
         return self._gripSize
@@ -89,7 +92,7 @@ class Mainw(QtWidgets.QMainWindow):
         outRect = self.rect()
         # an "inner" rect used for reference to set the geometries of size grips
         inRect = outRect.adjusted(self.gripSize, self.gripSize,
-            -self.gripSize, -self.gripSize)
+                                  -self.gripSize, -self.gripSize)
 
         # top left
         self.cornerGrips[0].setGeometry(
@@ -112,17 +115,16 @@ class Mainw(QtWidgets.QMainWindow):
             inRect.left(), 0, inRect.width(), self.gripSize)
         # right edge
         self.sideGrips[2].setGeometry(
-            inRect.left() + inRect.width(), 
+            inRect.left() + inRect.width(),
             inRect.top(), self.gripSize, inRect.height())
         # bottom edge
         self.sideGrips[3].setGeometry(
-            self.gripSize, inRect.top() + inRect.height(), 
+            self.gripSize, inRect.top() + inRect.height(),
             inRect.width(), self.gripSize)
 
     def resizeEvent(self, event):
         QtWidgets.QMainWindow.resizeEvent(self, event)
         self.updateGrips()
-
 
 # app = QtWidgets.QApplication([])
 # m = Mainw()

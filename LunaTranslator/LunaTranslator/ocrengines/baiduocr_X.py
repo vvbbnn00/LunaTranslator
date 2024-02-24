@@ -1,22 +1,29 @@
 import requests
 import base64
 
-from myutils.config import globalconfig 
-from ocrengines.baseocrclass import baseocr 
+from myutils.config import globalconfig
+from ocrengines.baseocrclass import baseocr
+
+
 class OCR(baseocr):
     def langmap(self):
-        return {"zh":"CHN_ENG","en":"ENG","ja":"JAP","en":"ENG","ko":"KOR","fr":"FRE","es":"SPA"}
+        return {"zh": "CHN_ENG", "en": "ENG", "ja": "JAP", "en": "ENG", "ko": "KOR", "fr": "FRE", "es": "SPA"}
+
     def initocr(self):
-        self.appid,self.secretKey,self.accstoken=None,None,None
+        self.appid, self.secretKey, self.accstoken = None, None, None
         self.checkchange()
-    def checkchange(self): 
-        self.checkempty(['API Key','Secret Key'])
-        if (self.config['API Key'],self.config['Secret Key'] )!=(self.appid,self.secretKey)  :
-            self.appid,self.secretKey=self.config['API Key'],self.config['Secret Key']
-            self.accstoken=self.session.get('https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id='+self.appid+'&client_secret='+self.secretKey).json()['access_token']
-    def ocr(self,imgfile):
+
+    def checkchange(self):
+        self.checkempty(['API Key', 'Secret Key'])
+        if (self.config['API Key'], self.config['Secret Key']) != (self.appid, self.secretKey):
+            self.appid, self.secretKey = self.config['API Key'], self.config['Secret Key']
+            self.accstoken = self.session.get(
+                'https://aip.baidubce.com/oauth/2.0/token?grant_type=client_credentials&client_id=' + self.appid + '&client_secret=' + self.secretKey).json()[
+                'access_token']
+
+    def ocr(self, imgfile):
         self.checkchange()
-        if self.accstoken=="":
+        if self.accstoken == "":
             return ''
         headers = {
             'authority': 'aip.baidubce.com',
@@ -35,34 +42,35 @@ class OCR(baseocr):
         }
 
         params = {
-            'access_token':self.accstoken# '',
+            'access_token': self.accstoken  # '',
         }
-        with open(imgfile,'rb') as ff:
-            f=ff.read()
-        b64=base64.b64encode(f)
+        with open(imgfile, 'rb') as ff:
+            f = ff.read()
+        b64 = base64.b64encode(f)
 
         data = {
-            'image': b64 , 
-            'detect_direction':globalconfig['verticalocr'],
-            'language_type':self.srclang 
-        } 
-        interfacetype=self.config['接口']
-         
-        url=[
+            'image': b64,
+            'detect_direction': globalconfig['verticalocr'],
+            'language_type': self.srclang
+        }
+        interfacetype = self.config['接口']
+
+        url = [
             'https://aip.baidubce.com/rest/2.0/ocr/v1/general_basic',
             'https://aip.baidubce.com/rest/2.0/ocr/v1/general',
             'https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic',
             'https://aip.baidubce.com/rest/2.0/ocr/v1/accurate'
         ][interfacetype]
         response = self.session.post(url, params=params, headers=headers, data=data)
-        try: 
-            
+        try:
+
             self.countnum()
-            if interfacetype in [0,2]:
-                return  self.space.join([x['words']  for x in response.json()['words_result']])
+            if interfacetype in [0, 2]:
+                return self.space.join([x['words'] for x in response.json()['words_result']])
             else:
-                texts=[x['words']  for x in response.json()['words_result']]
-                boxs=[(x['location']['left'],x['location']['top'],x['location']['left']+x['location']['width'],x['location']['top']+x['location']['height'])  for x in response.json()['words_result']]
-                return self.common_solve_text_orientation(boxs,texts)
+                texts = [x['words'] for x in response.json()['words_result']]
+                boxs = [(x['location']['left'], x['location']['top'], x['location']['left'] + x['location']['width'],
+                         x['location']['top'] + x['location']['height']) for x in response.json()['words_result']]
+                return self.common_solve_text_orientation(boxs, texts)
         except:
             raise Exception(response.text)

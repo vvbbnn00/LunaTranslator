@@ -1,13 +1,16 @@
 from traceback import print_exc
 from translator.basetranslator import basetrans
 import requests
+
+
 # OpenAI
 # from openai import OpenAI
 
 class TS(basetrans):
     def langmap(self):
         return {"zh": "zh-CN"}
-    def __init__(self, typename) :
+
+    def __init__(self, typename):
         self.timeout = 30
         self.api_url = ""
         self.history = {
@@ -15,7 +18,8 @@ class TS(basetrans):
             "zh": []
         }
         self.session = requests.Session()
-        super( ).__init__(typename)
+        super().__init__(typename)
+
     def sliding_window(self, text_ja, text_zh):
         if text_ja == "" or text_zh == "":
             return
@@ -24,12 +28,14 @@ class TS(basetrans):
         if len(self.history['ja']) > int(self.config['附带上下文个数（必须打开利用上文翻译）']) + 1:
             del self.history['ja'][0]
             del self.history['zh'][0]
+
     def get_history(self, key):
         prompt = ""
         for q in self.history[key]:
             prompt += q + "\n"
         prompt = prompt.strip()
         return prompt
+
     def get_client(self, api_url):
         if api_url[-4:] == "/v1/":
             api_url = api_url[:-1]
@@ -42,6 +48,7 @@ class TS(basetrans):
         self.api_url = api_url
         # OpenAI
         # self.client = OpenAI(api_key="114514", base_url=api_url)
+
     def make_messages(self, query, history_ja=None, history_zh=None, **kwargs):
         messages = [
             {
@@ -68,7 +75,6 @@ class TS(basetrans):
         )
         return messages
 
-
     def send_request(self, query, is_test=False, **kwargs):
         extra_query = {
             'do_sample': bool(self.config['do_sample']),
@@ -84,8 +90,9 @@ class TS(basetrans):
                 messages=messages,
                 temperature=float(self.config['temperature']),
                 top_p=float(self.config['top_p']),
-                max_tokens= 1 if is_test else int(self.config['max_new_token']),
-                frequency_penalty=float(kwargs['frequency_penalty']) if "frequency_penalty" in kwargs.keys() else float(self.config['frequency_penalty']),
+                max_tokens=1 if is_test else int(self.config['max_new_token']),
+                frequency_penalty=float(kwargs['frequency_penalty']) if "frequency_penalty" in kwargs.keys() else float(
+                    self.config['frequency_penalty']),
                 seed=-1,
                 extra_query=extra_query,
                 stream=False,
@@ -93,10 +100,11 @@ class TS(basetrans):
             output = self.session.post(self.api_url + "/chat/completions", timeout=self.timeout, json=data).json()
         except requests.Timeout as e:
             raise ValueError(f"连接到Sakura API超时：{self.api_url}，当前最大连接时间为: {self.timeout}，请尝试修改参数。")
-            
+
         except Exception as e:
             print(e)
-            raise ValueError(f"无法连接到Sakura API：{self.api_url}，请检查你的API链接是否正确填写，以及API后端是否成功启动。")
+            raise ValueError(
+                f"无法连接到Sakura API：{self.api_url}，请检查你的API链接是否正确填写，以及API后端是否成功启动。")
         return output
 
     def translate(self, query):

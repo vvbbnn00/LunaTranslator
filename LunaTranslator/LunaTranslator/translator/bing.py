@@ -1,9 +1,10 @@
-
-from traceback import print_exc 
-import re 
-import requests ,time,urllib
-from urllib.parse import quote 
+from traceback import print_exc
+import re
+import requests, time, urllib
+from urllib.parse import quote
 from translator.basetranslator import basetrans
+
+
 class Tse:
     def __init__(self):
         self.author = 'Ulion.Tse'
@@ -13,7 +14,6 @@ class Tse:
         self.transform_en_translator_pool = ('Itranslate', 'Lingvanex', 'MyMemory')
         self.auto_pool = ('auto', 'detect', 'auto-detect',)
         self.zh_pool = ('zh', 'zh-CN', 'zh-CHS', 'zh-Hans', 'zh-Hans_CN', 'cn', 'chi',)
- 
 
     @staticmethod
     def get_headers(host_url: str,
@@ -48,7 +48,7 @@ class Tse:
         if if_api and if_http_override_for_api:
             api_headers.update({'X-HTTP-Method-Override': 'GET'})
         return host_headers if not if_api else api_headers
- 
+
 
 class Bing(Tse):
     def __init__(self, server_region='EN'):
@@ -68,23 +68,21 @@ class Bing(Tse):
         self.output_auto = 'auto-detect'
         self.output_zh = 'zh-Hans'
         self.input_limit = int(1e3)
- 
 
     def get_ig_iid(self, host_html):
-        
         # iid = et.xpath('//*[@id="tta_outGDCont"]/@data-iid')[0]  # browser page is different between request page.
-        #iid = 'translator.5028'
-        iid=re.search('<div[ ]+id="tta_outGDCont"[ ]+data-iid="(.*?)">',host_html).groups()[0]
+        # iid = 'translator.5028'
+        iid = re.search('<div[ ]+id="tta_outGDCont"[ ]+data-iid="(.*?)">', host_html).groups()[0]
         ig = re.compile('IG:"(.*?)"').findall(host_html)[0]
         return {'iid': iid, 'ig': ig}
 
     def get_tk(self, host_html):
         result_str = re.compile('var params_AbusePreventionHelper = (.*?);').findall(host_html)[0]
         print(result_str)
-        result =  eval(result_str)
+        result = eval(result_str)
         return {'key': result[0], 'token': result[1]}
- 
-    def bing_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs)  :
+
+    def bing_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs):
         """
         https://bing.com/Translator, https://cn.bing.com/Translator.
         :param query_text: str, must.
@@ -123,12 +121,14 @@ class Bing(Tse):
 
         not_update_cond_freq = 1 if self.query_count < update_session_after_freq else 0
         not_update_cond_time = 1 if time.time() - self.begin_time < update_session_after_seconds else 0
-        if not (self.session and self.language_map and not_update_cond_freq and not_update_cond_time and self.tk and self.ig_iid):
+        if not (
+                self.session and self.language_map and not_update_cond_freq and not_update_cond_time and self.tk and self.ig_iid):
             self.session = requests.Session()
-            host_html = self.session.get(self.host_url, headers=self.host_headers, timeout=timeout, proxies=proxies).text
+            host_html = self.session.get(self.host_url, headers=self.host_headers, timeout=timeout,
+                                         proxies=proxies).text
             self.tk = self.get_tk(host_html)
             self.ig_iid = self.get_ig_iid(host_html)
-             
+
         form_data = {
             'text': query_text,
             'fromLang': from_language,
@@ -136,9 +136,9 @@ class Bing(Tse):
             'tryFetchingGenderDebiasedTranslations': 'true'
         }
         form_data = {**form_data, **self.tk}
-        api_url_param = '?isVertical=1&&IG={}&IID={}'.format(self.ig_iid["ig"],self.ig_iid["iid"])
+        api_url_param = '?isVertical=1&&IG={}&IID={}'.format(self.ig_iid["ig"], self.ig_iid["iid"])
         api_url = ''.join([self.api_url, api_url_param])
- 
+
         r = self.session.post(api_url, headers=self.host_headers, data=form_data, timeout=timeout, proxies=proxies)
         r.raise_for_status()
         data = r.json()
@@ -150,16 +150,17 @@ class Bing(Tse):
 
 class TS(basetrans):
     def langmap(self):
-         return  {"zh":"zh-Hans","cht":"zh-Hant"} 
-    def inittranslator(self):   
-        self.engine=Bing()
-   
-    def translate(self,content): 
+        return {"zh": "zh-Hans", "cht": "zh-Hant"}
+
+    def inittranslator(self):
+        self.engine = Bing()
+
+    def translate(self, content):
         try:
-            return self.engine.bing_api(content,self.srclang,self.tgtlang,proxies=self.proxy,if_use_cn_host=True)
+            return self.engine.bing_api(content, self.srclang, self.tgtlang, proxies=self.proxy, if_use_cn_host=True)
         except:
-            return self.engine.bing_api(content,self.srclang,self.tgtlang,proxies=self.proxy)
-         
+            return self.engine.bing_api(content, self.srclang, self.tgtlang, proxies=self.proxy)
+
 # class TS(basetrans):
 #     def langmap(self):
 #          return  {"zh":"zh-Hans","cht":"zh-Hant"} 
@@ -187,26 +188,26 @@ class TS(basetrans):
 #                 'upgrade-insecure-requests': '1',
 #                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.53',
 #             }
-         
+
 #         response = self.ss.get('https://cn.bing.com/translator/' ,headers=headers)
 #         text=response.text
-        
+
 #         res=re.compile('var params_AbusePreventionHelper = (.*?);').findall(text)[0]
-         
+
 #         self.key=str(eval(res)[0])
 #         self.token=str(eval(res)[1])
 
 #         iid = 'translator.5028'
 #         ig = re.compile('IG:"(.*?)"').findall(text)[0]
-          
+
 #         self.IG=ig
- 
+
 
 #         self.iid=iid 
-   
+
 #     def translate(self,content): 
 #             print(content) 
-                    
+
 #             headers = { 
 #                 'authority': 'cn.bing.com',
 #                 'accept': '*/*',
@@ -230,12 +231,11 @@ class TS(basetrans):
 #                 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.53',
 #                 'x-edge-shopping-flag': '1',
 #             }
-        
+
 #             response = self.ss.post('https://cn.bing.com/ttranslatev3?isVertical=1&&IG='+self.IG+'&IID='+self.iid,headers=headers, data={
 #                  'fromLang':self.srclang,'text':content,'to':self.tgtlang,'token':self.token,'key':self.key
 #             })#data=data )
 #             js=response.json() 
 #             ch=js[0]['translations'][0]['text']
-            
+
 #             return ch
-         

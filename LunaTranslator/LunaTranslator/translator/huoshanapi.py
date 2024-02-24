@@ -1,19 +1,20 @@
- 
 import json
 from collections import OrderedDict
-import  requests
-from traceback import print_exc 
- 
-import requests  
-from translator.basetranslator import basetrans 
-from urllib.parse import urlencode 
+import requests
+from traceback import print_exc
+
+import requests
+from translator.basetranslator import basetrans
+from urllib.parse import urlencode
 from functools import reduce
-import hmac 
+import hmac
 import datetime
-import pytz 
+import pytz
 import hashlib
 import sys
 from urllib.parse import quote
+
+
 class ApiInfo(object):
     def __init__(self, method, path, query, form, header):
         self.method = method
@@ -24,6 +25,7 @@ class ApiInfo(object):
 
     def __str__(self):
         return 'method: ' + self.method + ', path: ' + self.path
+
 
 class Request(object):
     def __init__(self):
@@ -82,6 +84,7 @@ class Credentials(object):
     def set_sk(self, sk):
         self.sk = sk
 
+
 class ServiceInfo(object):
     def __init__(self, host, header, credentials, connection_timeout, socket_timeout, scheme='http'):
         self.host = host
@@ -90,6 +93,8 @@ class ServiceInfo(object):
         self.connection_timeout = connection_timeout
         self.socket_timeout = socket_timeout
         self.scheme = scheme
+
+
 class MetaData(object):
     def __init__(self):
         self.algorithm = ''
@@ -117,6 +122,7 @@ class MetaData(object):
     def set_signed_headers(self, signed_headers):
         self.signed_headers = signed_headers
 
+
 class Util(object):
     @staticmethod
     def norm_uri(path):
@@ -141,7 +147,7 @@ class Util(object):
             return hmac.new(key, bytes(content, encoding='utf-8'), hashlib.sha256).digest()
         else:
             return hmac.new(key, bytes(content.encode('utf-8')), hashlib.sha256).digest()
- 
+
     @staticmethod
     def sha256(content):
         # type(content) == <class 'str'>
@@ -168,7 +174,7 @@ class Util(object):
                 hv = '0' + hv
             lst.append(hv)
         return reduce(lambda x, y: x + y, lst)
-  
+
 
 class SignerV4(object):
     @staticmethod
@@ -194,8 +200,8 @@ class SignerV4(object):
         signing_key = SignerV4.get_signing_secret_key_v4(credentials.sk, md.date, md.region, md.service)
         sign = Util.to_hex(Util.hmac_sha256(signing_key, signing_str))
         request.headers['Authorization'] = SignerV4.build_auth_header_v4(sign, md, credentials)
-        return 
- 
+        return
+
     @staticmethod
     def hashed_canonical_request_v4(request, meta):
         # if sys.version_info[0] == 3:
@@ -228,7 +234,7 @@ class SignerV4(object):
              meta.signed_headers, body_hash])
 
         return Util.sha256(canoncial_request)
- 
+
     @staticmethod
     def get_signing_secret_key_v4(sk, date, region, service):
         if sys.version_info[0] == 3:
@@ -254,8 +260,8 @@ class Service(object):
         self.service_info = service_info
         self.api_info = api_info
         self.session = requests.session()
-      
-    def json(self, api, params, body,proxy):
+
+    def json(self, api, params, body, proxy):
         if not (api in self.api_info):
             raise Exception("no such api")
         api_info = self.api_info[api]
@@ -265,13 +271,14 @@ class Service(object):
 
         SignerV4.sign(r, self.service_info.credentials)
 
-        url = r.build() 
+        url = r.build()
         resp = self.session.post(url, headers=r.headers, data=r.body.encode('utf8').decode("latin1"),
-                                 timeout=(self.service_info.connection_timeout, self.service_info.socket_timeout), proxies=  proxy)
+                                 timeout=(self.service_info.connection_timeout, self.service_info.socket_timeout),
+                                 proxies=proxy)
         if resp.status_code == 200:
             return json.dumps(resp.json())
         else:
-            raise Exception(resp.text )
+            raise Exception(resp.text)
 
     def prepare_request(self, api_info, params, doseq=0):
         for key in params:
@@ -316,10 +323,11 @@ class Service(object):
 
         return od
 
-def trans(TextList,k_access_key,k_secret_key,src,tgt,proxy):
+
+def trans(TextList, k_access_key, k_secret_key, src, tgt, proxy):
     # k_access_key = 'AKLTY2IzNTM1YzQzNDQ1NDFkMzk0MTRjNTE2YmEzNTgzNWY' # https://console.volcengine.com/iam/keymanage/
     # k_secret_key = 'TVRRMk1qaGxOMk14Tmpoa05EQXhZbUUwT1RFeU1qYzVPVEptTXpRMU9HRQ=='
-  
+
     k_service_info = \
         ServiceInfo('open.volcengineapi.com',
                     {'Content-Type': 'application/json'},
@@ -336,27 +344,28 @@ def trans(TextList,k_access_key,k_secret_key,src,tgt,proxy):
     service = Service(k_service_info, k_api_info)
     body = {
         'TargetLanguage': tgt,
-        'SourceLanguage':src,
-        'TextList': [ TextList],
+        'SourceLanguage': src,
+        'TextList': [TextList],
     }
-    res = service.json('translate', {}, json.dumps(body) ,proxy)
+    res = service.json('translate', {}, json.dumps(body), proxy)
     return res
 
-class TS(basetrans):  
+
+class TS(basetrans):
     def langmap(self):
-        return {"cht":"zh-Hant"}
-    def translate(self,query): 
-        self.checkempty(['Access Key ID','Secret Access Key'])
-  
+        return {"cht": "zh-Hant"}
+
+    def translate(self, query):
+        self.checkempty(['Access Key ID', 'Secret Access Key'])
+
         keyid = self.multiapikeycurrent['Access Key ID']
         acckey = self.multiapikeycurrent['Secret Access Key']
-        res=trans(query,keyid,acckey,self.srclang,self.tgtlang,self.proxy)
+        res = trans(query, keyid, acckey, self.srclang, self.tgtlang, self.proxy)
         try:
-            
-            res='\n'.join( [ _['Translation'] for _ in json.loads(res)['TranslationList'] ])
+
+            res = '\n'.join([_['Translation'] for _ in json.loads(res)['TranslationList']])
             self.countnum(query)
-        #print(res['trans_result'][0]['dst'])
+            # print(res['trans_result'][0]['dst'])
             return res
         except:
             raise Exception(res)
-         

@@ -44,7 +44,8 @@ class TS(basetrans):
 
     def stop_words(self):
         if self.config['stop(自定义停止符，多个用逗号隔开)']:
-            stop_words = [word.strip() for word in self.config['stop(自定义停止符，多个用逗号隔开)'].replace('，', ',').split(',')]
+            stop_words = [word.strip() for word in
+                          self.config['stop(自定义停止符，多个用逗号隔开)'].replace('，', ',').split(',')]
             return stop_words
         else:
             return []

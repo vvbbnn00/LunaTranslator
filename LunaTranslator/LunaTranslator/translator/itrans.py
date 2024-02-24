@@ -3,7 +3,8 @@ import re
 import urllib
 import random
 import time
- 
+
+
 class Tse:
     def __init__(self):
         self.author = 'Ulion.Tse'
@@ -12,7 +13,7 @@ class Tse:
         self.transform_en_translator_pool = ('Itranslate', 'Lingvanex',)
         self.auto_pool = ('auto', 'auto-detect',)
         self.zh_pool = ('zh', 'zh-CN', 'zh-CHS', 'zh-Hans', 'zh-Hans_CN', 'cn', 'chi',)
- 
+
     @staticmethod
     def get_headers(host_url: str,
                     if_api: bool = False,
@@ -43,7 +44,8 @@ class Tse:
         if if_api and if_multipart_for_api:
             api_headers.pop('Content-Type')
         return host_headers if not if_api else api_headers
- 
+
+
 class Itranslate(Tse):
     def __init__(self):
         super().__init__()
@@ -61,11 +63,11 @@ class Itranslate(Tse):
         self.input_limit = 1000
 
     def get_d_lang_map(self, lang_html):
-        
+
         lang_str = re.compile('d=\[{(.*?)}\]').search(lang_html).group()[2:]
-        dialect="dialect"
-        dataImage='dataImage'
-        label='label'
+        dialect = "dialect"
+        dataImage = 'dataImage'
+        label = 'label'
         return eval(lang_str)
 
     def get_apikey(self, lang_html):
@@ -90,22 +92,23 @@ class Itranslate(Tse):
                 :param show_time_stat_precision: int, default 4.
         :return: str or dict
         """
-         
-        if not (self.session ):
+
+        if not (self.session):
             self.session = requests.Session()
-            mainjsurl=self.session.get('https://itranslate-webapp-production.web.app/manifest.json',  proxies=kwargs['proxies']).json()['main.js']
-            mainjs=self.session.get(mainjsurl,  proxies=kwargs['proxies']).text
-            self.api_key= re.compile('"API-KEY":"(.*?)"').findall(mainjs)[0]
+            mainjsurl = self.session.get('https://itranslate-webapp-production.web.app/manifest.json',
+                                         proxies=kwargs['proxies']).json()['main.js']
+            mainjs = self.session.get(mainjsurl, proxies=kwargs['proxies']).text
+            self.api_key = re.compile('"API-KEY":"(.*?)"').findall(mainjs)[0]
             self.api_headers.update({'API-KEY': self.api_key})
         form_data = {
             'source': {'dialect': from_language, 'text': query_text, 'with': ['synonyms']},
             'target': {'dialect': to_language},
         }
-        r = self.session.post(self.api_url, headers=self.api_headers, json=form_data,  proxies=kwargs['proxies'])
-        r.raise_for_status() 
+        r = self.session.post(self.api_url, headers=self.api_headers, json=form_data, proxies=kwargs['proxies'])
+        r.raise_for_status()
         self.query_count += 1
         try:
-            return  r.json()['target']['text']
+            return r.json()['target']['text']
         except:
             raise Exception(r.text)
 
@@ -113,12 +116,15 @@ class Itranslate(Tse):
 from traceback import print_exc
 
 from translator.basetranslator import basetrans
+
+
 class TS(basetrans):
     def langmap(self):
-        return {"en":"en-UK","zh":"zh-CN","es":"es-ES","fr":"fr-FR","cht":"zh-TW"}
-    def inittranslator(self):  
-        self.engine=Itranslate()
-        self.engine._=None
-    def translate(self,content):  
-            return self.engine.itranslate_api(content,self.srclang,self.tgtlang,proxies=self.proxy)
-        
+        return {"en": "en-UK", "zh": "zh-CN", "es": "es-ES", "fr": "fr-FR", "cht": "zh-TW"}
+
+    def inittranslator(self):
+        self.engine = Itranslate()
+        self.engine._ = None
+
+    def translate(self, content):
+        return self.engine.itranslate_api(content, self.srclang, self.tgtlang, proxies=self.proxy)

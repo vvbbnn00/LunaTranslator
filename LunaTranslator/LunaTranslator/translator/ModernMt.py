@@ -1,9 +1,10 @@
-
-from traceback import print_exc 
-import requests,re,hashlib
+from traceback import print_exc
+import requests, re, hashlib
 from myutils.config import globalconfig
 from translator.basetranslator import basetrans
-import time,functools,sys,urllib
+import time, functools, sys, urllib
+
+
 class Tse:
     def __init__(self):
         self.author = 'Ulion.Tse'
@@ -13,7 +14,6 @@ class Tse:
         self.transform_en_translator_pool = ('Itranslate', 'Lingvanex', 'MyMemory')
         self.auto_pool = ('auto', 'detect', 'auto-detect',)
         self.zh_pool = ('zh', 'zh-CN', 'zh-CHS', 'zh-Hans', 'zh-Hans_CN', 'cn', 'chi',)
- 
 
     @staticmethod
     def get_headers(host_url: str,
@@ -48,7 +48,7 @@ class Tse:
         if if_api and if_http_override_for_api:
             api_headers.update({'X-HTTP-Method-Override': 'GET'})
         return host_headers if not if_api else api_headers
- 
+
 
 class ModernMt(Tse):
     def __init__(self):
@@ -57,21 +57,22 @@ class ModernMt(Tse):
         self.api_url = 'https://webapi.modernmt.com/translate'
         self.language_url = 'https://www.modernmt.com/scripts/app.bundle.js'
         self.host_headers = self.get_headers(self.host_url, if_api=False)
-        self.api_headers = self.get_headers(self.host_url, if_api=True, if_json_for_api=True, if_http_override_for_api=True)
+        self.api_headers = self.get_headers(self.host_url, if_api=True, if_json_for_api=True,
+                                            if_http_override_for_api=True)
         self.session = None
         self.language_map = None
         self.query_count = 0
         self.output_zh = 'zh-CN'
         self.input_limit = int(5e3)
- 
+
     def get_language_map(self, lang_url, ss, headers, timeout, proxies, **kwargs):
         lang_html = ss.get(lang_url, headers=headers, timeout=timeout, proxies=proxies).text
         d_lang_map = eval(eval(re.compile('''('{(.*?)}')''').search(lang_html).group()))  # JSON.parse('{"sq":
         lang_list = sorted(d_lang_map)
-         
+
         return {}.fromkeys(lang_list, lang_list)
- 
-    def modernMt_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs) :
+
+    def modernMt_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs):
         """
         https://www.modernmt.com/translate
         :param query_text: str, must.
@@ -106,14 +107,15 @@ class ModernMt(Tse):
         if not (self.session and self.language_map and not_update_cond_freq and not_update_cond_time):
             self.session = requests.Session()
             _ = self.session.get(self.host_url, headers=self.host_headers, timeout=timeout, proxies=proxies)
-             
+
         time_stamp = int(time.time() * 1e3)
         form_data = {
             'q': query_text,
             'source': '' if from_language == 'auto' else from_language,
             'target': to_language,
             'ts': time_stamp,
-            'verify': hashlib.md5('webkey_E3sTuMjpP8Jez49GcYpDVH7r#{}#{}'.format(time_stamp,query_text).encode()).hexdigest(),
+            'verify': hashlib.md5(
+                'webkey_E3sTuMjpP8Jez49GcYpDVH7r#{}#{}'.format(time_stamp, query_text).encode()).hexdigest(),
             'hints': '',
             'multiline': 'true',
         }
@@ -124,12 +126,13 @@ class ModernMt(Tse):
         self.query_count += 1
         return data if is_detail_result else data['data']['translation']
 
-class TS(basetrans): 
+
+class TS(basetrans):
     def langmap(self):
-        return { 'zh':'zh-CN',  "cht":'zh-TW'}
-    def inittranslator(self): 
-        self.engine=ModernMt()
+        return {'zh': 'zh-CN', "cht": 'zh-TW'}
+
+    def inittranslator(self):
+        self.engine = ModernMt()
+
     def translate(self, content):
-        
-        return  self.engine.modernMt_api(content,self.srclang,self.tgtlang,proxies=self.proxy)
-         
+        return self.engine.modernMt_api(content, self.srclang, self.tgtlang, proxies=self.proxy)

@@ -2,7 +2,9 @@ import requests
 import re
 import urllib
 import random
-import time 
+import time
+
+
 class Tse:
     def __init__(self):
         self.author = 'Ulion.Tse'
@@ -11,7 +13,7 @@ class Tse:
         self.transform_en_translator_pool = ('Itranslate', 'Lingvanex',)
         self.auto_pool = ('auto', 'auto-detect',)
         self.zh_pool = ('zh', 'zh-CN', 'zh-CHS', 'zh-Hans', 'zh-Hans_CN', 'cn', 'chi',)
- 
+
     @staticmethod
     def get_headers(host_url: str,
                     if_api: bool = False,
@@ -42,7 +44,7 @@ class Tse:
         if if_api and if_multipart_for_api:
             api_headers.pop('Content-Type')
         return host_headers if not if_api else api_headers
- 
+
 
 class Reverso(Tse):
     def __init__(self):
@@ -59,10 +61,8 @@ class Reverso(Tse):
         self.query_count = 0
         self.output_zh = 'zh'  # 'chi', because there are self.language_tran
         self.input_limit = 2000
- 
-     
- 
-    def reverso_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs) :
+
+    def reverso_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs):
         """
         https://www.reverso.net/text-translation
         :param query_text: str, must.
@@ -91,8 +91,9 @@ class Reverso(Tse):
         not_update_cond_time = 1 if time.time() - self.begin_time < update_session_after_seconds else 0
         if not (self.session and not_update_cond_time and self.language_map and self.decrypt_language_map):
             self.session = requests.Session()
-            host_html = self.session.get(self.host_url, headers=self.host_headers, timeout=timeout, proxies=proxies).text
-            
+            host_html = self.session.get(self.host_url, headers=self.host_headers, timeout=timeout,
+                                         proxies=proxies).text
+
         form_data = {
             'format': 'text',
             'from': from_language,
@@ -113,16 +114,18 @@ class Reverso(Tse):
         return data if is_detail_result else ''.join(data['translation'])
 
 
-
 from traceback import print_exc
 
 from translator.basetranslator import basetrans
+
+
 class TS(basetrans):
     def langmap(self):
-        return {"zh":"chi","en":"eng","es":"spa","fr":"fra","ko":"kor","ru":"rus","ja":"jpn"}
-    def inittranslator(self):  
-        self.engine=Reverso()
-        self.engine._=None
-    def translate(self,content):  
-            return self.engine.reverso_api(content,self.srclang,self.tgtlang,proxies=self.proxy)
-        
+        return {"zh": "chi", "en": "eng", "es": "spa", "fr": "fra", "ko": "kor", "ru": "rus", "ja": "jpn"}
+
+    def inittranslator(self):
+        self.engine = Reverso()
+        self.engine._ = None
+
+    def translate(self, content):
+        return self.engine.reverso_api(content, self.srclang, self.tgtlang, proxies=self.proxy)

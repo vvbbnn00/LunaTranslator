@@ -7,6 +7,7 @@ import datetime
 import base64
 from translator.basetranslator import basetrans
 
+
 class TS(basetrans):
     def translate(self, query):
         self.checkempty(['Access_Key'])
@@ -27,7 +28,9 @@ class TS(basetrans):
         nonce = str(uuid.uuid4())
         md5 = hashlib.md5(req_body.encode('utf-8'))
         content_md5 = base64.b64encode(md5.digest()).decode('utf-8')
-        stringToSign = "{method}\n{accept}\n{md5}\n{content_type}\n{date}\nx-acs-signature-method:HMAC-SHA1\nx-acs-signature-nonce:{nonce}\nx-acs-version:{version}\n{path}".format(method='POST', accept='application/json', md5=content_md5, content_type='application/json; charset=utf-8', date=date, nonce=nonce, version='2019-01-02', path='/api/translate/web/general')
+        stringToSign = "{method}\n{accept}\n{md5}\n{content_type}\n{date}\nx-acs-signature-method:HMAC-SHA1\nx-acs-signature-nonce:{nonce}\nx-acs-version:{version}\n{path}".format(
+            method='POST', accept='application/json', md5=content_md5, content_type='application/json; charset=utf-8',
+            date=date, nonce=nonce, version='2019-01-02', path='/api/translate/web/general')
         key = access_key_secret.encode('utf-8')
         message = stringToSign.encode('utf-8')
         signed = hmac.new(key, message, digestmod=hashlib.sha1).digest()

@@ -1,15 +1,15 @@
-  
-import requests  ,json
+import requests, json
 
-from myutils.config import globalconfig 
-from translator.basetranslator import basetrans 
+from myutils.config import globalconfig
+from translator.basetranslator import basetrans
+
+
 class TS(basetrans):
     def langmap(self):
-        return {"cht":"zh-Hant"}
-    def translate(self,content): 
-                
-                
-                
+        return {"cht": "zh-Hant"}
+
+    def translate(self, content):
+
         headers = {
             'authority': 'translate.volcengine.com',
             'accept': 'application/json, text/plain, */*',
@@ -30,10 +30,10 @@ class TS(basetrans):
             'glossary_list': [],
             'category': '',
         }
-        response = self.session.post('https://translate.volcengine.com/crx/translate/v1/',   headers=headers, json=json_data)
-        
+        response = self.session.post('https://translate.volcengine.com/crx/translate/v1/', headers=headers,
+                                     json=json_data)
+
         try:
             return response.json()['translation']
         except:
-            raise Exception(json.dumps(response.json(),ensure_ascii=False))
-         
+            raise Exception(json.dumps(response.json(), ensure_ascii=False))

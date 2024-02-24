@@ -1,9 +1,10 @@
-
-from traceback import print_exc 
-import requests,re
+from traceback import print_exc
+import requests, re
 from myutils.config import globalconfig
 from translator.basetranslator import basetrans
-import time,functools,sys,urllib
+import time, functools, sys, urllib
+
+
 class Tse:
     def __init__(self):
         self.author = 'Ulion.Tse'
@@ -13,7 +14,6 @@ class Tse:
         self.transform_en_translator_pool = ('Itranslate', 'Lingvanex', 'MyMemory')
         self.auto_pool = ('auto', 'detect', 'auto-detect',)
         self.zh_pool = ('zh', 'zh-CN', 'zh-CHS', 'zh-Hans', 'zh-Hans_CN', 'cn', 'chi',)
- 
 
     @staticmethod
     def get_headers(host_url: str,
@@ -48,7 +48,7 @@ class Tse:
         if if_api and if_http_override_for_api:
             api_headers.update({'X-HTTP-Method-Override': 'GET'})
         return host_headers if not if_api else api_headers
- 
+
 
 class AlibabaV1(Tse):
     def __init__(self):
@@ -84,9 +84,10 @@ class AlibabaV1(Tse):
         for _ in range(1, 10):
             a = hex(int(0 * 1e10))[2:]  # int->str: 16, '0x'
             o += a
-        return o[:42] 
-    def alibaba_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs)  :
-        
+        return o[:42]
+
+    def alibaba_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs):
+
         timeout = kwargs.get('timeout', None)
         proxies = kwargs.get('proxies', None)
         sleep_seconds = kwargs.get('sleep_seconds', 0)
@@ -97,11 +98,12 @@ class AlibabaV1(Tse):
 
         not_update_cond_freq = 1 if self.query_count < update_session_after_freq else 0
         not_update_cond_time = 1 if time.time() - self.begin_time < update_session_after_seconds else 0
-        if not (self.session and self.language_map and not_update_cond_freq and not_update_cond_time and self.dmtrack_pageid):
+        if not (
+                self.session and self.language_map and not_update_cond_freq and not_update_cond_time and self.dmtrack_pageid):
             self.session = requests.Session()
             host_response = self.session.get(self.host_url, headers=self.host_headers, timeout=timeout, proxies=proxies)
             self.dmtrack_pageid = self.get_dmtrack_pageid(host_response)
-        
+
         use_domain = kwargs.get('professional_field', 'message')
         form_data = {
             "srcLanguage": from_language,
@@ -112,20 +114,22 @@ class AlibabaV1(Tse):
             "source": "",
         }
         params = {"dmtrack_pageid": self.dmtrack_pageid}
-        r = self.session.post(self.api_url, headers=self.api_headers, params=params, data=form_data, timeout=timeout, proxies=proxies)
-        r.raise_for_status() 
+        r = self.session.post(self.api_url, headers=self.api_headers, params=params, data=form_data, timeout=timeout,
+                              proxies=proxies)
+        r.raise_for_status()
         self.query_count += 1
         try:
             return '\n'.join(r.json()['listTargetText'])
         except:
             raise Exception(r.text)
 
-class TS(basetrans): 
+
+class TS(basetrans):
     def langmap(self):
-        return { "cht":"zh-tw"}
-    def inittranslator(self): 
-        self.engine=AlibabaV1()
+        return {"cht": "zh-tw"}
+
+    def inittranslator(self):
+        self.engine = AlibabaV1()
+
     def translate(self, content):
-        
-        return  self.engine.alibaba_api(content,self.srclang,self.tgtlang,proxies=self.proxy)
-         
+        return self.engine.alibaba_api(content, self.srclang, self.tgtlang, proxies=self.proxy)

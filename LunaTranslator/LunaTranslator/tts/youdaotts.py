@@ -1,27 +1,29 @@
 import threading
 from traceback import print_exc
 import requests
-from myutils.config import globalconfig    
+from myutils.config import globalconfig
 import base64
 import os
 import time
-from tts.basettsclass import TTSbase 
+from tts.basettsclass import TTSbase
+
+
 class TTS(TTSbase):
     def getvoicelist(self):
-        return ['ja','zh','en']
-    def voiceshowmap(self,voice):
+        return ['ja', 'zh', 'en']
+
+    def voiceshowmap(self, voice):
         return {
-            'ja':'Japanese',
-            'zh':'Chinese',
-            'en':"English"
+            'ja': 'Japanese',
+            'zh': 'Chinese',
+            'en': "English"
         }[voice]
 
-    def speak(self,content,rate,voice,voiceidx):
-                
+    def speak(self, content, rate, voice, voiceidx):
         headers = {
             'Accept': '*/*',
             'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
-            'Connection': 'keep-alive', 
+            'Connection': 'keep-alive',
             'Range': 'bytes=0-',
             'Referer': 'https://fanyi.youdao.com/',
             'Sec-Fetch-Dest': 'audio',
@@ -38,10 +40,10 @@ class TTS(TTSbase):
             'le': voice,
         }
 
-        response = requests.get('https://dict.youdao.com/dictvoice', params=params,   headers=headers,proxies={'http':None,'https':None}).content
-        fname=str(time.time())
-        with open('./cache/tts/'+fname+'.mp3','wb') as ff:
+        response = requests.get('https://dict.youdao.com/dictvoice', params=params, headers=headers,
+                                proxies={'http': None, 'https': None}).content
+        fname = str(time.time())
+        with open('./cache/tts/' + fname + '.mp3', 'wb') as ff:
             ff.write(response)
-           
-        return ('./cache/tts/'+fname+'.mp3')
-             
+
+        return ('./cache/tts/' + fname + '.mp3')

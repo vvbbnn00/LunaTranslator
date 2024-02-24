@@ -1,21 +1,22 @@
- 
 import json
 from collections import OrderedDict
-import  requests
+import requests
 
-from traceback import print_exc 
- 
-import requests  
-from myutils.config import ocrsetting 
-from urllib.parse import urlencode 
+from traceback import print_exc
+
+import requests
+from myutils.config import ocrsetting
+from urllib.parse import urlencode
 from functools import reduce
-import hmac ,base64
+import hmac, base64
 import datetime
-import pytz ,time
-import hashlib,os
-import sys,threading
+import pytz, time
+import hashlib, os
+import sys, threading
 from urllib.parse import quote
-VERSION='v1.0.75'
+
+VERSION = 'v1.0.75'
+
 
 class MetaData(object):
     def __init__(self):
@@ -43,6 +44,8 @@ class MetaData(object):
 
     def set_signed_headers(self, signed_headers):
         self.signed_headers = signed_headers
+
+
 class Request(object):
     def __init__(self):
         self.schema = ''
@@ -85,6 +88,7 @@ class Request(object):
 
     def build(self, doseq=0):
         return self.schema + '://' + self.host + self.path + '?' + urlencode(self.query, doseq)
+
 
 class Util(object):
     @staticmethod
@@ -209,6 +213,7 @@ class Credentials(object):
 
     def set_session_token(self, session_token):
         self.session_token = session_token
+
 
 class SignerV4(object):
     @staticmethod
@@ -402,6 +407,7 @@ class SignerV4(object):
     def get_current_format_date():
         return datetime.datetime.now(tz=pytz.timezone('UTC')).strftime("%Y%m%dT%H%M%SZ")
 
+
 class ServiceInfo(object):
     def __init__(self, host, header, credentials, connection_timeout, socket_timeout, scheme='http'):
         self.host = host
@@ -464,7 +470,6 @@ class Service(object):
                     if 'sk' in j:
                         self.service_info.credentials.set_sk(j['sk'])
 
-
     def set_ak(self, ak):
         self.service_info.credentials.set_ak(ak)
 
@@ -511,7 +516,7 @@ class Service(object):
         else:
             raise Exception(resp.text)
 
-    def post(self, api, params, form,proxy):
+    def post(self, api, params, form, proxy):
         if not (api in self.api_info):
             raise Exception("no such api")
         api_info = self.api_info[api]
@@ -524,7 +529,8 @@ class Service(object):
         url = r.build()
 
         resp = self.session.post(url, headers=r.headers, data=r.form,
-                                 timeout=(self.service_info.connection_timeout, self.service_info.socket_timeout),proxies=proxy)
+                                 timeout=(self.service_info.connection_timeout, self.service_info.socket_timeout),
+                                 proxies=proxy)
         if resp.status_code == 200:
             return resp.text
         else:
@@ -605,7 +611,8 @@ class Service(object):
             od[key] = param2[key]
 
         return od
-  
+
+
 class VisualService(Service):
     _instance_lock = threading.Lock()
 
@@ -648,14 +655,27 @@ class VisualService(Service):
             "ImageCut": ApiInfo("POST", "/", {"Action": "ImageCut", "Version": "2020-08-26"}, {}, {}),
             "EntityDetect": ApiInfo("POST", "/", {"Action": "EntityDetect", "Version": "2020-08-26"}, {}, {}),
             "GoodsDetect": ApiInfo("POST", "/", {"Action": "GoodsDetect", "Version": "2020-08-26"}, {}, {}),
-            "VideoSummarizationSubmitTask": ApiInfo("POST", "/", {"Action": "VideoSummarizationSubmitTask", "Version": "2020-08-26"}, {}, {}),
-            "VideoSummarizationQueryTask": ApiInfo("GET", "/", {"Action": "VideoSummarizationQueryTask", "Version": "2020-08-26"}, {}, {}),
-            "VideoOverResolutionSubmitTask": ApiInfo("POST", "/", {"Action": "VideoOverResolutionSubmitTask", "Version": "2020-08-26"}, {}, {}),
-            "VideoOverResolutionQueryTask": ApiInfo("GET", "/", {"Action": "VideoOverResolutionQueryTask", "Version": "2020-08-26"}, {}, {}),
-            "VideoRetargetingSubmitTask": ApiInfo("POST", "/", {"Action": "VideoRetargetingSubmitTask", "Version": "2020-08-26"}, {}, {}),
-            "VideoRetargetingQueryTask": ApiInfo("GET", "/", {"Action": "VideoRetargetingQueryTask", "Version": "2020-08-26"}, {}, {}),
-            "VideoInpaintSubmitTask": ApiInfo("POST", "/", {"Action": "VideoInpaintSubmitTask", "Version": "2020-08-26"}, {}, {}),
-            "VideoInpaintQueryTask": ApiInfo("GET", "/", {"Action": "VideoInpaintQueryTask", "Version": "2020-08-26"}, {}, {}),
+            "VideoSummarizationSubmitTask": ApiInfo("POST", "/",
+                                                    {"Action": "VideoSummarizationSubmitTask", "Version": "2020-08-26"},
+                                                    {}, {}),
+            "VideoSummarizationQueryTask": ApiInfo("GET", "/",
+                                                   {"Action": "VideoSummarizationQueryTask", "Version": "2020-08-26"},
+                                                   {}, {}),
+            "VideoOverResolutionSubmitTask": ApiInfo("POST", "/", {"Action": "VideoOverResolutionSubmitTask",
+                                                                   "Version": "2020-08-26"}, {}, {}),
+            "VideoOverResolutionQueryTask": ApiInfo("GET", "/",
+                                                    {"Action": "VideoOverResolutionQueryTask", "Version": "2020-08-26"},
+                                                    {}, {}),
+            "VideoRetargetingSubmitTask": ApiInfo("POST", "/",
+                                                  {"Action": "VideoRetargetingSubmitTask", "Version": "2020-08-26"}, {},
+                                                  {}),
+            "VideoRetargetingQueryTask": ApiInfo("GET", "/",
+                                                 {"Action": "VideoRetargetingQueryTask", "Version": "2020-08-26"}, {},
+                                                 {}),
+            "VideoInpaintSubmitTask": ApiInfo("POST", "/",
+                                              {"Action": "VideoInpaintSubmitTask", "Version": "2020-08-26"}, {}, {}),
+            "VideoInpaintQueryTask": ApiInfo("GET", "/", {"Action": "VideoInpaintQueryTask", "Version": "2020-08-26"},
+                                             {}, {}),
             "CarPlateDetection": ApiInfo("POST", "/", {"Action": "CarPlateDetection", "Version": "2020-08-26"}, {}, {}),
             "DistortionFree": ApiInfo("POST", "/", {"Action": "DistortionFree", "Version": "2020-08-26"}, {}, {}),
             "StretchRecovery": ApiInfo("POST", "/", {"Action": "StretchRecovery", "Version": "2020-08-26"}, {}, {}),
@@ -667,12 +687,20 @@ class VisualService(Service):
             "CarSegment": ApiInfo("POST", "/", {"Action": "CarSegment", "Version": "2020-08-26"}, {}, {}),
             "CarDetection": ApiInfo("POST", "/", {"Action": "CarDetection", "Version": "2020-08-26"}, {}, {}),
             "SkySegment": ApiInfo("POST", "/", {"Action": "SkySegment", "Version": "2020-08-26"}, {}, {}),
-            "ImageSearchImageAdd": ApiInfo("POST", "/", {"Action": "ImageSearchImageAdd", "Version": "2020-08-26"}, {}, {}),
-            "ImageSearchImageDelete": ApiInfo("POST", "/", {"Action": "ImageSearchImageDelete", "Version": "2020-08-26"}, {}, {}),
-            "ImageSearchImageSearch": ApiInfo("POST", "/", {"Action": "ImageSearchImageSearch", "Version": "2020-08-26"}, {}, {}),
-            "ProductSearchAddImage": ApiInfo("POST", "/", {"Action": "ProductSearchAddImage", "Version": "2022-06-16"}, {}, {}),
-            "ProductSearchDeleteImage": ApiInfo("POST", "/", {"Action": "ProductSearchDeleteImage", "Version": "2022-06-16"}, {}, {}),
-            "ProductSearchSearchImage": ApiInfo("POST", "/", {"Action": "ProductSearchSearchImage", "Version": "2022-06-16"}, {}, {}),
+            "ImageSearchImageAdd": ApiInfo("POST", "/", {"Action": "ImageSearchImageAdd", "Version": "2020-08-26"}, {},
+                                           {}),
+            "ImageSearchImageDelete": ApiInfo("POST", "/",
+                                              {"Action": "ImageSearchImageDelete", "Version": "2020-08-26"}, {}, {}),
+            "ImageSearchImageSearch": ApiInfo("POST", "/",
+                                              {"Action": "ImageSearchImageSearch", "Version": "2020-08-26"}, {}, {}),
+            "ProductSearchAddImage": ApiInfo("POST", "/", {"Action": "ProductSearchAddImage", "Version": "2022-06-16"},
+                                             {}, {}),
+            "ProductSearchDeleteImage": ApiInfo("POST", "/",
+                                                {"Action": "ProductSearchDeleteImage", "Version": "2022-06-16"}, {},
+                                                {}),
+            "ProductSearchSearchImage": ApiInfo("POST", "/",
+                                                {"Action": "ProductSearchSearchImage", "Version": "2022-06-16"}, {},
+                                                {}),
             "ClueLicense": ApiInfo("POST", "/", {"Action": "OcrClueLicense", "Version": "2020-08-26"}, {}, {}),
             "DrivingLicense": ApiInfo("POST", "/", {"Action": "DrivingLicense", "Version": "2020-08-26"}, {}, {}),
             "VehicleLicense": ApiInfo("POST", "/", {"Action": "VehicleLicense", "Version": "2020-08-26"}, {}, {}),
@@ -687,19 +715,24 @@ class VisualService(Service):
             "CoverVideo": ApiInfo("POST", "/", {"Action": "CoverVideo", "Version": "2020-08-26"}, {}, {}),
             "DollyZoom": ApiInfo("POST", "/", {"Action": "DollyZoom", "Version": "2020-08-26"}, {}, {}),
             "PotraitEffect": ApiInfo("POST", "/", {"Action": "PotraitEffect", "Version": "2020-08-26"}, {}, {}),
-            "ImageStyleConversion": ApiInfo("POST", "/", {"Action": "ImageStyleConversion", "Version": "2020-08-26"}, {}, {}),
+            "ImageStyleConversion": ApiInfo("POST", "/", {"Action": "ImageStyleConversion", "Version": "2020-08-26"},
+                                            {}, {}),
             "3DGameCartoon": ApiInfo("POST", "/", {"Action": "3DGameCartoon", "Version": "2020-08-26"}, {}, {}),
             "HairSegment": ApiInfo("POST", "/", {"Action": "HairSegment", "Version": "2020-08-26"}, {}, {}),
             "OcrSeal": ApiInfo("POST", "/", {"Action": "OcrSeal", "Version": "2021-08-23"}, {}, {}),
             "OcrPassInvoice": ApiInfo("POST", "/", {"Action": "OcrPassInvoice", "Version": "2021-08-23"}, {}, {}),
             "OCRTrade": ApiInfo("POST", "/", {"Action": "OCRTrade", "Version": "2020-12-21"}, {}, {}),
             "OCRRuanzhu": ApiInfo("POST", "/", {"Action": "OCRRuanzhu", "Version": "2020-12-21"}, {}, {}),
-            "OCRCosmeticProduct": ApiInfo("POST", "/", {"Action": "OCRCosmeticProduct", "Version": "2020-12-21"}, {}, {}),
+            "OCRCosmeticProduct": ApiInfo("POST", "/", {"Action": "OCRCosmeticProduct", "Version": "2020-12-21"}, {},
+                                          {}),
             "OCRPdf": ApiInfo("POST", "/", {"Action": "OCRPdf", "Version": "2021-08-23"}, {}, {}),
             "OCRTable": ApiInfo("POST", "/", {"Action": "OCRTable", "Version": "2021-08-23"}, {}, {}),
-            "VideoCoverSelection": ApiInfo("POST", "/", {"Action": "VideoCoverSelection", "Version": "2020-08-26"}, {}, {}),
-            "VideoHighlightExtractionSubmitTask": ApiInfo("POST", "/", {"Action": "VideoHighlightExtractionSubmitTask", "Version": "2020-08-26"}, {}, {}),
-            "VideoHighlightExtractionQueryTask": ApiInfo("GET", "/", {"Action": "VideoHighlightExtractionQueryTask", "Version": "2020-08-26"}, {}, {}),
+            "VideoCoverSelection": ApiInfo("POST", "/", {"Action": "VideoCoverSelection", "Version": "2020-08-26"}, {},
+                                           {}),
+            "VideoHighlightExtractionSubmitTask": ApiInfo("POST", "/", {"Action": "VideoHighlightExtractionSubmitTask",
+                                                                        "Version": "2020-08-26"}, {}, {}),
+            "VideoHighlightExtractionQueryTask": ApiInfo("GET", "/", {"Action": "VideoHighlightExtractionQueryTask",
+                                                                      "Version": "2020-08-26"}, {}, {}),
             "CertToken": ApiInfo("POST", "/", {"Action": "CertToken", "Version": "2022-08-31"}, {}, {}),
             "CertVerifyQuery": ApiInfo("POST", "/", {"Action": "CertVerifyQuery", "Version": "2022-08-31"}, {}, {}),
             "T2ILDM": ApiInfo("POST", "/", {"Action": "T2ILDM", "Version": "2022-08-31"}, {}, {}),
@@ -708,10 +741,10 @@ class VisualService(Service):
         }
         return api_info
 
-    def common_handler(self, api, form,proxy):
+    def common_handler(self, api, form, proxy):
         params = dict()
         try:
-            res = self.post(api, params, form,proxy)
+            res = self.post(api, params, form, proxy)
             res_json = json.loads(res)
             return res_json
         except Exception as e:
@@ -1100,14 +1133,14 @@ class VisualService(Service):
             return res_json
         except Exception as e:
             raise Exception(str(e))
-    
+
     def vat_invoice(self, form):
         try:
             res_json = self.common_handler("VatInvoice", form)
             return res_json
         except Exception as e:
             raise Exception(str(e))
-    
+
     def quota_invoice(self, form):
         try:
             res_json = self.common_handler("QuotaInvoice", form)
@@ -1198,7 +1231,7 @@ class VisualService(Service):
             return res_json
         except Exception as e:
             raise Exception(str(e))
-    
+
     def ocr_ruanzhu(self, form):
         try:
             res_json = self.common_handler("OCRRuanzhu", form)
@@ -1284,29 +1317,32 @@ class VisualService(Service):
             return res_json
         except Exception as e:
             raise Exception(str(e))
-    
-    def ocr_api(self, action, form,proxy):
+
+    def ocr_api(self, action, form, proxy):
         try:
-            res_json = self.common_handler(action, form,proxy)
+            res_json = self.common_handler(action, form, proxy)
             return res_json
         except Exception as e:
             raise Exception(str(e))
 
     def set_api_info(self, action, version):
         self.api_info[action] = ApiInfo("POST", "/", {"Action": action, "Version": version}, {}, {})
- 
+
+
 import requests
-import base64  
-from ocrengines.baseocrclass import baseocr 
+import base64
+from ocrengines.baseocrclass import baseocr
+
+
 class OCR(baseocr):
-      
-    def ocr(self,imgfile):  
+
+    def ocr(self, imgfile):
         visual_service = VisualService()
-        self.checkempty(['Access Key ID','Secret Access Key'])
+        self.checkempty(['Access Key ID', 'Secret Access Key'])
         # call below method if you dont set ak and sk in $HOME/.volc/config
         visual_service.set_ak(self.config['Access Key ID'])
         visual_service.set_sk(self.config['Secret Access Key'])
-        
+
         visual_service.set_api_info('MultiLanguageOCR', '2022-08-31')
 
         # below shows the sdk usage for all common apis,
@@ -1314,14 +1350,14 @@ class OCR(baseocr):
         # or contact us for further help
         form = dict()
         import base64
-        with open(imgfile,'rb') as ff:
-            f=ff.read()
-        b64=base64.b64encode(f)
-        form["image_base64"] =b64
-        resp = visual_service.ocr_api('MultiLanguageOCR', form,self.proxy)
+        with open(imgfile, 'rb') as ff:
+            f = ff.read()
+        b64 = base64.b64encode(f)
+        form["image_base64"] = b64
+        resp = visual_service.ocr_api('MultiLanguageOCR', form, self.proxy)
         try:
-            texts=[box['text'] for box in resp['data']['ocr_infos']]
-            boxs=self.flatten4point([box['rect'] for box in resp['data']['ocr_infos']]) 
-            return self.common_solve_text_orientation(boxs,texts)
+            texts = [box['text'] for box in resp['data']['ocr_infos']]
+            boxs = self.flatten4point([box['rect'] for box in resp['data']['ocr_infos']])
+            return self.common_solve_text_orientation(boxs, texts)
         except:
             raise Exception(resp)

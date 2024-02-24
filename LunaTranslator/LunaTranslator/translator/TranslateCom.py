@@ -3,7 +3,8 @@ import re
 import urllib
 import random
 import time
- 
+
+
 class Tse:
     def __init__(self):
         self.author = 'Ulion.Tse'
@@ -12,7 +13,7 @@ class Tse:
         self.transform_en_translator_pool = ('Itranslate', 'Lingvanex',)
         self.auto_pool = ('auto', 'auto-detect',)
         self.zh_pool = ('zh', 'zh-CN', 'zh-CHS', 'zh-Hans', 'zh-Hans_CN', 'cn', 'chi',)
- 
+
     @staticmethod
     def get_headers(host_url: str,
                     if_api: bool = False,
@@ -43,7 +44,7 @@ class Tse:
         if if_api and if_multipart_for_api:
             api_headers.pop('Content-Type')
         return host_headers if not if_api else api_headers
- 
+
 
 class TranslateCom(Tse):
     def __init__(self):
@@ -60,8 +61,8 @@ class TranslateCom(Tse):
         self.query_count = 0
         self.output_zh = 'zh'
         self.input_limit = 15000  # fifteen thousand letters left today.
- 
-    def translateCom_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs) :
+
+    def translateCom_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs):
         """
         https://www.translate.com/machine-translation
         :param query_text: str, must.
@@ -93,12 +94,13 @@ class TranslateCom(Tse):
             _ = self.session.get(self.host_url, headers=self.host_headers, timeout=timeout, proxies=proxies)
             lang_r = self.session.get(self.language_url, headers=self.host_headers, timeout=timeout, proxies=proxies)
             self.language_description = lang_r.json()
-            
+
         if from_language == 'auto':
             detect_form = {'text_to_translate': query_text}
-            r_detect = self.session.post(self.lang_detect_url, data=detect_form, headers=self.api_headers, timeout=timeout, proxies=proxies)
+            r_detect = self.session.post(self.lang_detect_url, data=detect_form, headers=self.api_headers,
+                                         timeout=timeout, proxies=proxies)
             from_language = r_detect.json()['language']
- 
+
         form_data = {
             'text_to_translate': query_text,
             'source_lang': from_language,
@@ -113,16 +115,18 @@ class TranslateCom(Tse):
         return data if is_detail_result else data['translated_text']  # translation_source is microsoft, wtf!
 
 
-
 from traceback import print_exc
 
 from translator.basetranslator import basetrans
+
+
 class TS(basetrans):
     def langmap(self):
-        return {"cht":"zh-TW"}
-    def inittranslator(self):  
-        self.engine=TranslateCom()
-        self.engine._=None
-    def translate(self,content):  
-            return self.engine.translateCom_api(content,self.srclang,self.tgtlang,proxies=self.proxy)
-        
+        return {"cht": "zh-TW"}
+
+    def inittranslator(self):
+        self.engine = TranslateCom()
+        self.engine._ = None
+
+    def translate(self, content):
+        return self.engine.translateCom_api(content, self.srclang, self.tgtlang, proxies=self.proxy)

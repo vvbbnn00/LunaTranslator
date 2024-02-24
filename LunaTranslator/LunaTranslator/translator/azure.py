@@ -1,10 +1,11 @@
- 
-import requests 
- 
-from translator.basetranslator import basetrans    
-import uuid ,json
+import requests
+
+from translator.basetranslator import basetrans
+import uuid, json
+
+
 class TS(basetrans):
-    def translate(self,query):   
+    def translate(self, query):
         self.checkempty(['key1'])
 
         # Add your key and endpoint
@@ -13,7 +14,7 @@ class TS(basetrans):
 
         # location, also known as region.
         # required if you're using a multi-service or regional (not global) resource. It can be found in the Azure portal on the Keys and Endpoint page.
-        location =self.config['Location']
+        location = self.config['Location']
 
         path = '/translate'
         constructed_url = endpoint + path
@@ -21,7 +22,7 @@ class TS(basetrans):
         params = {
             'api-version': '3.0',
             'from': self.srclang,
-            'to':   self.tgtlang 
+            'to': self.tgtlang
         }
 
         headers = {
@@ -43,4 +44,3 @@ class TS(basetrans):
             return response[0]['translations'][0]['text']
         except:
             raise Exception(request.text)
-          

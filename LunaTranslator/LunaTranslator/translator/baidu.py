@@ -1,13 +1,13 @@
- 
- 
 from traceback import print_exc
 import requests
-from urllib import parse 
+from urllib import parse
 import os
-import re 
-from translator.basetranslator import basetrans  
+import re
+from translator.basetranslator import basetrans
 from myutils.config import globalconfig
-import time,urllib
+import time, urllib
+
+
 class Tse:
     def __init__(self):
         self.author = 'Ulion.Tse'
@@ -17,7 +17,6 @@ class Tse:
         self.transform_en_translator_pool = ('Itranslate', 'Lingvanex', 'MyMemory')
         self.auto_pool = ('auto', 'detect', 'auto-detect',)
         self.zh_pool = ('zh', 'zh-CN', 'zh-CHS', 'zh-Hans', 'zh-Hans_CN', 'cn', 'chi',)
- 
 
     @staticmethod
     def get_headers(host_url: str,
@@ -52,7 +51,6 @@ class Tse:
         if if_api and if_http_override_for_api:
             api_headers.update({'X-HTTP-Method-Override': 'GET'})
         return host_headers if not if_api else api_headers
- 
 
 
 class BaiduV1(Tse):
@@ -74,8 +72,8 @@ class BaiduV1(Tse):
     # def get_language_map(self, host_html, **kwargs):
     #     lang_str = re.compile('langMap: {(.*?)}').search(host_html.replace('\n', '').replace('  ', '')).group()[8:]
     #     return execjs.eval(lang_str)
- 
-    def baidu_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs)  :
+
+    def baidu_api(self, query_text: str, from_language: str = 'auto', to_language: str = 'en', **kwargs):
         """
         https://fanyi.baidu.com
         :param query_text: str, must.
@@ -109,13 +107,15 @@ class BaiduV1(Tse):
         not_update_cond_time = 1 if time.time() - self.begin_time < update_session_after_seconds else 0
         if not (self.session):
             self.session = requests.Session()
-            _ = self.session.get(self.host_url, headers=self.host_headers, timeout=timeout, proxies=proxies)  # must twice, send cookies.
-            host_html = self.session.get(self.host_url, headers=self.host_headers, timeout=timeout, proxies=proxies).text
+            _ = self.session.get(self.host_url, headers=self.host_headers, timeout=timeout,
+                                 proxies=proxies)  # must twice, send cookies.
+            host_html = self.session.get(self.host_url, headers=self.host_headers, timeout=timeout,
+                                         proxies=proxies).text
             # self.language_map = self.get_language_map(host_html, from_language=from_language, to_language=to_language)
 
             if not self.get_lang_url:
                 self.get_lang_url = re.compile(self.get_lang_url_pattern).search(host_html).group()
-             
+
         form_data = {
             'from': from_language,
             'to': to_language,
@@ -132,11 +132,13 @@ class BaiduV1(Tse):
         except:
             raise Exception(data)
 
+
 class TS(basetrans):
     def langmap(self):
-        return {"es":"spa","ko":"kor","fr":"fra","ja":"jp","cht":"cht","vi":"vie","uk":"ukr","ar":"ara"}
-    def inittranslator(self)  :  
-        
-        self.engine=BaiduV1()
-    def translate(self,query):  
-        return self.engine.baidu_api(query,self.srclang,self.tgtlang,proxies=self.proxy)
+        return {"es": "spa", "ko": "kor", "fr": "fra", "ja": "jp", "cht": "cht", "vi": "vie", "uk": "ukr", "ar": "ara"}
+
+    def inittranslator(self):
+        self.engine = BaiduV1()
+
+    def translate(self, query):
+        return self.engine.baidu_api(query, self.srclang, self.tgtlang, proxies=self.proxy)

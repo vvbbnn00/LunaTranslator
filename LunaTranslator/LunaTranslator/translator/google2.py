@@ -1,24 +1,25 @@
- 
 from traceback import print_exc
 import requests
 from urllib.parse import quote
 import re
-import json  
+import json
 
 from myutils.config import globalconfig
 from translator.basetranslator import basetrans
 import time
+
+
 class TS(basetrans):
     def langmap(self):
-        return {"zh":"zh-CN","cht":"zh-TW"}
-    def translate(self,content): 
-                
+        return {"zh": "zh-CN", "cht": "zh-TW"}
+
+    def translate(self, content):
         headers = {
             'authority': 'translate.google.com',
             'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9',
             'accept-language': 'zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6',
             'cache-control': 'no-cache',
-             'pragma': 'no-cache',
+            'pragma': 'no-cache',
             'referer': 'https://translate.google.com/m',
             'sec-ch-ua': '"Microsoft Edge";v="105", "Not)A;Brand";v="8", "Chromium";v="105"',
             'sec-ch-ua-arch': '"x86"',
@@ -43,9 +44,8 @@ class TS(basetrans):
             'hl': 'zh-CN',
             'q': content,
         }
-        
-        response = self.session.get('https://translate.google.com/m', params=params,verify=False, headers=headers )
-        
-        res=re.search('<div class="result-container">([\\s\\S]*?)</div>',response.text).groups() 
+
+        response = self.session.get('https://translate.google.com/m', params=params, verify=False, headers=headers)
+
+        res = re.search('<div class="result-container">([\\s\\S]*?)</div>', response.text).groups()
         return res[0]
-    
