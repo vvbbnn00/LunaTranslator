@@ -710,5 +710,9 @@
     "选择文本窗口中文本框只读": "Selezionare le caselle di testo di sola lettura nella finestra di testo",
     "多重区域模式": "Modalità multi regione",
     "记忆选定区域": "Area di selezione della memoria",
-    "关闭": "chiudi"
+    "关闭": "chiudi",
+    "TGW语言模型": "Modello linguistico TGW",
+    "VoiceVox文件夹": "Cartella VoiceVox",
+    "若使用本地VoiceVox，只需填写文件夹路径即可；若使用远程VoiceVox，需填写URL地址。": "Se si utilizza VoiceVox locale, è sufficiente compilare il percorso della cartella; se si utilizza VoiceVox remoto, è necessario compilare l'indirizzo URL.",
+    "若VoiceVox URL为空，则默认为 http://127.0.0.1:50021": "Se l'URL di VoiceVox è vuoto, il valore predefinito è http://127.0.0.1:50021"
 }

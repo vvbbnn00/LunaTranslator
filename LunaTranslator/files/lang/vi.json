@@ -710,5 +710,9 @@
     "选择文本窗口中文本框只读": "Chọn hộp văn bản chỉ đọc trong cửa sổ văn bản",
     "多重区域模式": "Chế độ đa vùng",
     "记忆选定区域": "Ghi nhớ vùng chọn",
-    "关闭": "Đóng cửa"
+    "关闭": "Đóng cửa",
+    "TGW语言模型": "Mô hình ngôn ngữ TGW",
+    "VoiceVox文件夹": "Thư mục VoiceVox",
+    "若使用本地VoiceVox，只需填写文件夹路径即可；若使用远程VoiceVox，需填写URL地址。": "Nếu sử dụng VoiceVox cục bộ, chỉ cần điền đường dẫn thư mục; nếu sử dụng VoiceVox từ xa, bạn cần điền địa chỉ URL.",
+    "若VoiceVox URL为空，则默认为 http://127.0.0.1:50021": "Nếu VoiceVox URL trống, mặc định là http://127.0.0.1:50021"
 }

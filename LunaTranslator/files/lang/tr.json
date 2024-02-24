@@ -710,5 +710,9 @@
     "选择文本窗口中文本框只读": "Metin penceresindeki sadece okuyulmuş metin kutularını seçin",
     "多重区域模式": "Çok bölge modu",
     "记忆选定区域": "Hafıza seçim alanı",
-    "关闭": "kapat"
+    "关闭": "kapat",
+    "TGW语言模型": "TGW dil modeli",
+    "VoiceVox文件夹": "VoiceVox dosya klasörü",
+    "若使用本地VoiceVox，只需填写文件夹路径即可；若使用远程VoiceVox，需填写URL地址。": "Eğer yerel VoiceVox kullanıyorsanız, sadece dosya yolu gerekir; uzak VoiceVox kullanıyorsanız, URL adresi gerekir.",
+    "若VoiceVox URL为空，则默认为 http://127.0.0.1:50021": "Eğer VoiceVox URL boşsa, varsayılan olarak http://127.0.0.1:50021"
 }

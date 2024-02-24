@@ -62,6 +62,7 @@ class autoinitdialog(QDialog):
             if res != '':
                 edit.setText(res)
 
+        lineW = None
         for line in lines:
             if 'type' in line:
                 line['t'] = line['type']
@@ -69,8 +70,10 @@ class autoinitdialog(QDialog):
                 dd = line['d']
             if 'k' in line:
                 key = line['k']
-            if line['t'] == 'label':
+            if 't' not in line:
+                line['t'] = 'default'
 
+            if line['t'] == 'label':
                 if 'islink' in line and line['islink']:
                     lineW = QLabel(makehtml(dd[key]))
                     lineW.setOpenExternalLinks(True)
@@ -98,6 +101,8 @@ class autoinitdialog(QDialog):
                 lineW.button(QDialogButtonBox.Cancel).setText(_TR('取消'))
             elif line['t'] == 'lineedit':
                 lineW = QLineEdit(dd[key])
+                placeholder = '' if 'placeholder' not in line else line['placeholder']
+                lineW.setPlaceholderText(_TR(placeholder))
                 regist.append([dd, key, lineW.text])
             elif line['t'] == 'file':
                 e = QLineEdit(dd[key])
@@ -118,7 +123,6 @@ class autoinitdialog(QDialog):
                 lineW.setSingleStep(0.1 if 'step' not in line else line['step'])
                 lineW.setValue(dd[key])
                 lineW.valueChanged.connect(functools.partial(dd.__setitem__, key))
-
             elif line['t'] == 'intspin':
                 lineW = QSpinBox()
                 lineW.setMinimum(0 if 'min' not in line else line['min'])
@@ -126,10 +130,18 @@ class autoinitdialog(QDialog):
                 lineW.setSingleStep(1 if 'step' not in line else line['step'])
                 lineW.setValue(dd[key])
                 lineW.valueChanged.connect(functools.partial(dd.__setitem__, key))
+
             if 'l' in line:
-                formLayout.addRow(_TR(line['l']), lineW)
+                if lineW:
+                    formLayout.addRow(_TR(line['l']), lineW)
+                else:
+                    row = QHBoxLayout()
+                    row.addWidget(QLabel(_TR(line['l'])))
+                    formLayout.addRow(row)
             else:
                 formLayout.addRow(lineW)
+
+            lineW = None
         self.show()
 
 

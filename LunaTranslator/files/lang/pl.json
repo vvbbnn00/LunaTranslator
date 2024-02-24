@@ -710,5 +710,9 @@
     "选择文本窗口中文本框只读": "Zaznaczanie pola tekstowe tylko do odczytu w oknie tekstowym",
     "多重区域模式": "Tryb wielu regionów",
     "记忆选定区域": "Obszar wyboru pamięci",
-    "关闭": "zamknij"
+    "关闭": "zamknij",
+    "TGW语言模型": "Model językowy TGW",
+    "VoiceVox文件夹": "Folder VoiceVox",
+    "若使用本地VoiceVox，只需填写文件夹路径即可；若使用远程VoiceVox，需填写URL地址。": "Jeśli używasz lokalnego VoiceVox, wystarczy podać ścieżkę do folderu; jeśli używasz zdalnego VoiceVox, musisz podać adres URL.",
+    "若VoiceVox URL为空，则默认为 http://127.0.0.1:50021": "Jeśli adres URL VoiceVox jest pusty, domyślnie jest to http://127.0.0.1:50021"
 }

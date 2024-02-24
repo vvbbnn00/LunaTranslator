@@ -371,6 +371,9 @@ class MAINUI():
             self.readcurrent()
 
     def readcurrent(self, force=False):
+        if not hasattr(self, 'reader') or self.reader is None:
+            print('[TTS] No reader has been initialized.')
+            return
         try:
             if force or globalconfig['autoread']:
                 self.reader.read(self.currentread)

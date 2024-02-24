@@ -710,5 +710,9 @@
     "选择文本窗口中文本框只读": "Select read-only text boxes in the text window",
     "多重区域模式": "Multi region mode",
     "记忆选定区域": "Memory selection area",
-    "关闭": "close"
+    "关闭": "close",
+    "TGW语言模型": "TGW Language Model",
+    "VoiceVox文件夹": "VoiceVox folder",
+    "若使用本地VoiceVox，只需填写文件夹路径即可；若使用远程VoiceVox，需填写URL地址。": "If you use local VoiceVox, just fill in the folder path; if you use remote VoiceVox, you need to fill in the URL address.",
+    "若VoiceVox URL为空，则默认为 http://127.0.0.1:50021": "If the VoiceVox URL is empty, the default is http://127.0.0.1:50021"
 }

@@ -1,7 +1,7 @@
 import functools
 
 from PyQt5.QtWidgets import QComboBox
-from gui.inputdialog import getsomepath1
+from gui.inputdialog import getsomepath1, autoinitdialog
 from myutils.config import globalconfig, _TRL
 import os, functools
 import gobject
@@ -16,6 +16,24 @@ def setTab5_direct(self):
 
 def setTab5(self):
     self.tabadd_lazy(self.tab_widget, ('语音合成'), lambda: setTab5lz(self))
+
+
+def voicevox_config_dialog(parent, d, callback=None):
+    """
+    Path With URL TextLine
+    :param parent: parent
+    :param d: The dict to be modified
+    :param callback: callback
+    """
+    autoinitdialog(parent, 'VOICEVOX', 800, [
+        # d refers to the dict to be modified
+        # k refers to the key in the dict
+        {'t': 'file', 'l': 'VoiceVox文件夹', 'd': d, 'k': 'path', 'dir': True, 'filter': ""},
+        {'t': 'lineedit', 'l': 'VoiceVox URL', 'd': d, 'k': 'base_url', 'placeholder': 'http://127.0.0.1:50021'},
+        {'l': '若使用本地VoiceVox，只需填写文件夹路径即可；若使用远程VoiceVox，需填写URL地址。'},
+        {'l': '若VoiceVox URL为空，则默认为 http://127.0.0.1:50021'},
+        {'t': 'okcancel', 'callback': callback},
+    ])
 
 
 def getttsgrid(self):
@@ -36,12 +54,19 @@ def getttsgrid(self):
                                                        name, gobject.baseobject.startreader), pair='readerswitchs'),
 
         ]
-        if 'path' in globalconfig['reader'][name]:
+        if name in ['voiceroid2', 'voiceroidplus']:
             line += [getcolorbutton(globalconfig, '',
                                     callback=functools.partial(getsomepath1, self, globalconfig['reader'][name]['name'],
                                                                globalconfig['reader'][name], 'path',
                                                                globalconfig['reader'][name]['name'],
                                                                gobject.baseobject.startreader, True), icon='fa.gear',
+                                    constcolor="#FF69B4")]
+        elif name in ['voicevox']:
+            line += [getcolorbutton(globalconfig, '',
+                                    callback=functools.partial(voicevox_config_dialog, self,
+                                                               globalconfig['reader'][name],
+                                                               gobject.baseobject.startreader),
+                                    icon='fa.gear',
                                     constcolor="#FF69B4")]
         else:
             line += ['']
