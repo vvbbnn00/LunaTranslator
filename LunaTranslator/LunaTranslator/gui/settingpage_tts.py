@@ -5,7 +5,7 @@ from gui.inputdialog import getsomepath1, autoinitdialog
 from myutils.config import globalconfig, _TRL
 import os, functools
 import gobject
-from gui.usefulwidget import getsimplecombobox, getspinbox, getcolorbutton, yuitsu_switch, getsimpleswitch
+from gui.usefulwidget import getsimplecombobox, getspinbox, getcolorbutton, yuitsu_switch, getsimpleswitch, gettextedit
 
 
 def setTab5_direct(self):
@@ -94,6 +94,7 @@ def setTab5lz(self):
         [('朗读的翻译', 6), (
             getsimplecombobox(_TRL([globalconfig['fanyi'][x]['name'] for x in globalconfig['fanyi']]), globalconfig,
                               'read_translator'), 15)],
+        [('跳过自动朗读正则', 6), (gettextedit(globalconfig, 'not_read_regex'), 15)],
     ]
     gridlayoutwidget = self.makegrid(grids)
     gridlayoutwidget = self.makescroll(gridlayoutwidget)

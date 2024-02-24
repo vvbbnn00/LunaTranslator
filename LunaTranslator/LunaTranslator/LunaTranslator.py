@@ -310,7 +310,6 @@ class MAINUI():
 
     def GetTranslationCallback_(self, onlytrans, classname, currentsignature, optimization_params, _showrawfunction,
                                 _showrawfunction_sig, contentraw, res):
-
         if type(res) == str:
             if res.startswith('<msg_translator>'):
                 if currentsignature == self.currentsignature:
@@ -374,8 +373,19 @@ class MAINUI():
         if not hasattr(self, 'reader') or self.reader is None:
             print('[TTS] No reader has been initialized.')
             return
+        can_read = force
         try:
-            if force or globalconfig['autoread']:
+            not_read_regex = re.compile(r'(?i)' + globalconfig.get('not_read_regex', ''))
+            # print(force, self.currentread, not_read_regex.pattern, not_read_regex.search(self.currentread))
+
+            # Auto-read is enabled and the current text is not marked as "do not read".
+            if globalconfig['autoread']:
+                if not_read_regex.search(self.currentread):
+                    can_read |= False
+                else:
+                    can_read |= True
+
+            if can_read:
                 self.reader.read(self.currentread)
         except:
             print_exc()

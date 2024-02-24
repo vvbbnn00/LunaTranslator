@@ -356,6 +356,13 @@ def getsimplecombobox(lst, d, k, callback=None):
     return s
 
 
+def gettextedit(d, k, callback=None):
+    s = QLineEdit()
+    s.setText(d.get(k, ''))
+    s.textChanged.connect(functools.partial(callbackwrap, d, k, callback))
+    return s
+
+
 def getspinbox(mini, maxi, d, key, double=False, step=1, callback=None, dec=1):
     if double:
         s = QDoubleSpinBox()
